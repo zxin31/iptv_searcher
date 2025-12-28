@@ -15,6 +15,7 @@ Thumbs.db
 
 # 测试生成的文件
 iptv_channels.csv
+iptv_channels_with_status.csv
 iptv_channels.txt
 iptv_channels.m3u
 iptv_available_channels.m3u

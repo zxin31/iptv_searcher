@@ -417,53 +417,68 @@ def main():
     """
     print("正在搜索IPTV链接...")
     iptv_list = search_iptv_links()
+    
+    if not iptv_list:
+        print("未找到任何IPTV链接，程序退出")
+        return
+    
+    # 自动测试所有链接的连通性
+    print("\n自动测试所有链接的连通性...")
+    iptv_list = test_iptv_links(iptv_list, max_workers=300, timeout=1)
+    
+    # 计算可连通的频道数量
+    available_count = sum(1 for ch in iptv_list if ch['status'] == '可用')
+    # 直接显示可连通的数量
+    print(f"\n测试完成！可连通的频道数量：{available_count} 个")
+    
+    # 显示测试结果
     display_iptv_list(iptv_list)
     
-    if iptv_list:
-        print("\n功能选项：")
-        print("1. 测试链接可用性")
-        print("2. 导出为CSV文件")
-        print("3. 导出为文本文件")
-        print("4. 导出为M3U格式")
-        print("5. 全部导出")
-        print("6. 只导出可用频道(M3U格式)")
-        print("0. 退出程序")
+    # 显示功能选项
+    print("\n功能选项：")
+    print("1. 重新测试链接可用性")
+    print("2. 导出为CSV文件")
+    print("3. 导出为文本文件")
+    print("4. 导出为M3U格式")
+    print("5. 全部导出")
+    print("6. 只导出可用频道(M3U格式)")
+    print("0. 退出程序")
+    
+    try:
+        choice = input("请选择功能选项 (0-6): ")
         
-        try:
-            choice = input("请选择功能选项 (0-6): ")
-            
-            if choice == "1":
-                # 测试链接
-                iptv_list = test_iptv_links(iptv_list, max_workers=300, timeout=1)
-                # 显示测试结果
-                display_iptv_list(iptv_list)
-                # 询问是否导出测试结果
-                export_choice = input("\n是否导出测试结果？(y/n): ")
-                if export_choice.lower() == "y":
-                    export_to_csv(iptv_list, "iptv_channels_with_status.csv")
-            elif choice == "2":
-                export_to_csv(iptv_list)
-            elif choice == "3":
-                export_to_txt(iptv_list)
-            elif choice == "4":
-                export_to_m3u(iptv_list)
-            elif choice == "5":
-                export_to_csv(iptv_list)
-                export_to_txt(iptv_list)
-                export_to_m3u(iptv_list)
-            elif choice == "6":
-                # 先测试链接，再导出可用的频道
-                iptv_list = test_iptv_links(iptv_list, max_workers=300, timeout=1)
-                export_to_m3u(iptv_list, "iptv_available_channels.m3u", only_available=True)
-            elif choice == "0":
-                print("已退出程序")
-                return
-            else:
-                print("无效选项，已退出程序")
-        except KeyboardInterrupt:
-            print("\n已取消操作")
-        except Exception as e:
-            print(f"操作过程中出错：{e}")
+        if choice == "1":
+            # 重新测试链接
+            iptv_list = test_iptv_links(iptv_list, max_workers=300, timeout=1)
+            # 显示测试结果
+            display_iptv_list(iptv_list)
+            # 计算可连通的频道数量
+            available_count = sum(1 for ch in iptv_list if ch['status'] == '可用')
+            # 用更显眼的格式显示可连通的数量
+            print(f"\n" + "="*60)
+            print(f"🎯 测试完成！可连通的频道数量：{available_count} 个")
+            print(f"="*60)
+        elif choice == "2":
+            export_to_csv(iptv_list)
+        elif choice == "3":
+            export_to_txt(iptv_list)
+        elif choice == "4":
+            export_to_m3u(iptv_list)
+        elif choice == "5":
+            export_to_csv(iptv_list)
+            export_to_txt(iptv_list)
+            export_to_m3u(iptv_list)
+        elif choice == "6":
+            # 导出可用的频道
+            export_to_m3u(iptv_list, "iptv_available_channels.m3u", only_available=True)
+        elif choice == "0":
+            print("已退出程序")
+        else:
+            print("无效选项，已退出程序")
+    except KeyboardInterrupt:
+        print("\n已取消操作")
+    except Exception as e:
+        print(f"操作过程中出错：{e}")
 
 if __name__ == "__main__":
     main()
